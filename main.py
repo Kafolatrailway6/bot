@@ -31,6 +31,7 @@ import pymysql
 from pymysql.cursors import DictCursor
 import csv
 import re
+from openpyxl import Workbook
 from datetime import datetime, timedelta
 from ftplib import FTP
 from collections import defaultdict
@@ -1833,6 +1834,77 @@ async def preload_order_images(order_items: list) -> Dict[str, Image.Image]:
     logger.info(f"✅ Preloaded {len(result)} images successfully")
     return result
 
+    def generate_order_xlsx(order_items: list) -> bytes:
+    """Создаёт Excel заказа: Название товара / Цена / Количество"""
+
+    output = io.BytesIO()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Заказ"
+
+    # Заголовки
+    ws["A1"] = "Название товара"
+    ws["B1"] = "Цена"
+    ws["C1"] = "Количество"
+
+    # Товары
+    for row_num, item in enumerate(order_items, start=2):
+        name = item.get("name_xlsx") or item.get("name", "Без названия")
+        price = int(item.get("price", 0))
+        qty = int(item.get("qty", 0))
+
+        ws.cell(row=row_num, column=1, value=name)
+        ws.cell(row=row_num, column=2, value=price)
+        ws.cell(row=row_num, column=3, value=qty)
+
+    # Ширина столбцов
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 15
+    ws.column_dimensions["C"].width = 15
+
+    # Сохраняем Excel в память
+    wb.save(output)
+    output.seek(0)
+
+    return output.getvalue()
+
+    
+    def generate_order_xlsx(order_items: list) -> bytes:
+    """Создаёт Excel заказа: Название товара / Цена / Количество"""
+
+    output = io.BytesIO()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Заказ"
+
+    # Заголовки
+    ws["A1"] = "Название товара"
+    ws["B1"] = "Цена"
+    ws["C1"] = "Количество"
+
+    # Товары
+    for row_num, item in enumerate(order_items, start=2):
+        name = item.get("name_xlsx") or item.get("name", "Без названия")
+        price = int(item.get("price", 0))
+        qty = int(item.get("qty", 0))
+
+        ws.cell(row=row_num, column=1, value=name)
+        ws.cell(row=row_num, column=2, value=price)
+        ws.cell(row=row_num, column=3, value=qty)
+
+    # Ширина столбцов
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 15
+    ws.column_dimensions["C"].width = 15
+
+    # Сохраняем Excel в память
+    wb.save(output)
+    output.seek(0)
+
+    return output.getvalue()
+    
 def generate_order_pdf(
     order_items: list,
     total: int,
@@ -2765,6 +2837,7 @@ async def handle_webapp_data(message: Message, state: FSMContext):
             enriched_item = {
                 "id": product_id,
                 "name": product.get("name", "Без названия"),
+                "name_xlsx": product.get("name_xlsx", product.get("name", "Без названия")),
                 "price": int(product.get("price", 0)),
                 "qty": qty,
                 "image": first_image,  # ← только первое фото для PDF
@@ -3720,6 +3793,22 @@ async def order_signature_handler(message: Message, state: FSMContext):
         if client_latitude is not None and client_longitude is not None:
             location_text = f"📍 Координаты: {client_latitude:.6f}, {client_longitude:.6f}\n"
 
+                # ===== СОЗДАЕМ XLSX ВСЕГО ЗАКАЗА =====
+        xlsx_data = await asyncio.to_thread(
+            generate_order_xlsx,
+            order_items=order_data["items"]
+        )
+        
+        xlsx_file = BufferedInputFile(
+            xlsx_data,
+            filename=f"order_{base_order_id}.xlsx"
+        )
+        
+        await bot.send_document(
+            chat_id=ADMIN_CHAT_ID,
+            document=xlsx_file,
+            caption=f"📊 Excel заказа №{base_order_id}"
+        )
         # Создаем и отправляем PDF для каждой категории
         part_num = 1
         for category, category_items in sorted(grouped_items.items()):

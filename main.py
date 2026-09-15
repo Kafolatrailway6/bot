@@ -101,7 +101,7 @@ async def fetch_products_from_sheets():
     
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(GOOGLE_SHEETS_URL, timeout=10) as response:
+            async with session.get(GOOGLE_SHEETS_URL, timeout=30) as response:
                 if response.status == 200:
                     data = await response.json()
                     

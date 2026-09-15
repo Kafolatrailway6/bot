@@ -1835,7 +1835,7 @@ async def preload_order_images(order_items: list) -> Dict[str, Image.Image]:
     return result
 
 def generate_order_xlsx(order_items: list) -> bytes:
-    """Создаёт Excel заказа: Название товара / Цена / Количество"""
+    """Создаёт Excel заказа: Название товара / Количество"""
 
     output = io.BytesIO()
 
@@ -1843,27 +1843,28 @@ def generate_order_xlsx(order_items: list) -> bytes:
     ws = wb.active
     ws.title = "Заказ"
 
-   # Заголовки
-ws["A1"] = "Название товара"
-ws["B1"] = "Количество"
+    # Заголовки
+    ws["A1"] = "Название товара"
+    ws["B1"] = "Количество"
 
-# Товары
-for row_num, item in enumerate(order_items, start=2):
-    name = item.get("name_xlsx") or item.get("name", "Без названия")
-    qty = int(item.get("qty", 0))
+    # Товары
+    for row_num, item in enumerate(order_items, start=2):
+        name = item.get("name_xlsx") or item.get("name", "Без названия")
+        qty = int(item.get("qty", 0))
 
-    ws.cell(row=row_num, column=1, value=name)
-    ws.cell(row=row_num, column=2, value=qty)
+        ws.cell(row=row_num, column=1, value=name)
+        ws.cell(row=row_num, column=2, value=qty)
 
-# Ширина столбцов
-ws.column_dimensions["A"].width = 35
-ws.column_dimensions["B"].width = 15
+    # Ширина столбцов
+    ws.column_dimensions["A"].width = 35
+    ws.column_dimensions["B"].width = 15
 
-# Сохраняем Excel в память
-wb.save(output)
-output.seek(0)
+    # Сохраняем Excel в память
+    wb.save(output)
+    output.seek(0)
 
-return output.getvalue()
+    return output.getvalue()
+    
 
 
 def generate_order_pdf(

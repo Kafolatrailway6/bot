@@ -2013,7 +2013,7 @@ def generate_order_pdf(
     y -= 6 * mm
 
     # ✅ НОВЫЕ ЗАГОЛОВКИ: №, Фото, ID, Наименование, Кол-во, Вес, Куб, Цена, Сумма
-    c.setFont(main_font, 12)  # для заголовков
+    c.setFont(main_font, 9)  # для заголовков
     header_y = y
 
     c.drawString(table_x, header_y, "№")

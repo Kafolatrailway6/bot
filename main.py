@@ -1740,7 +1740,7 @@ def format_currency(value: int) -> str:
     while s:
         parts.insert(0, s[-3:])
         s = s[:-3]
-    return " ".join(parts) + " so'm"
+    return " ".join(parts)
 
 
 def wrap_text(text: str, max_chars: int):
@@ -2024,15 +2024,15 @@ def generate_order_pdf(
     c.drawString(table_x + col_num_w + col_image_w + col_id_w, header_y, "Наименование")
     c.drawRightString(table_x + col_num_w + col_image_w + col_id_w + col_name_w + col_qty_w, header_y, "Кол-во")
     c.drawRightString(table_x + col_num_w + col_image_w + col_id_w + col_name_w + col_qty_w + col_weight_w, header_y,
-                      "Вес")
+                      "Вес(кг)")
     c.drawRightString(table_x + col_num_w + col_image_w + col_id_w + col_name_w + col_qty_w + col_weight_w + col_cube_w,
-                      header_y, "Куб")
+                      header_y, "Куб(m3)")
     c.drawRightString(
         table_x + col_num_w + col_image_w + col_id_w + col_name_w + col_qty_w + col_weight_w + col_cube_w + col_price_w,
-        header_y, "Цена")
+        header_y, "Цена(сум)")
     c.drawRightString(
         table_x + col_num_w + col_image_w + col_id_w + col_name_w + col_qty_w + col_weight_w + col_cube_w + col_price_w + col_sum_w,
-        header_y, "Сумма")
+        header_y, "Сумма(сум)")
 
 
     y -= 5 * mm
